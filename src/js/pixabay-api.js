@@ -2,9 +2,6 @@ function showLoader() {
   const loader = document.querySelector('.loader');
   loader.style.display = 'block';
 }
-import axios from 'axios';
-
-axios.default.baseURL = BASE_URL;
 
 export function searchPhotos(input) {
   showLoader();
