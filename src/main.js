@@ -1,10 +1,19 @@
-import { searchPhotos } from './js/pixabay-api';
-import { markupInterface } from './js/render-functions';
+import {
+  searchPhotos,
+  resetPage,
+  incrementPage,
+  getCurrentPage,
+  setCurrentQuery,
+  getCurrentQuery,
+  getTotalHits,
+} from './js/pixabay-api.js';
+import { markupInterface, listImg } from './js/render-functions.js';
 import iziToast from 'izitoast';
 import 'izitoast/dist/css/iziToast.min.css';
-import { listImg } from './js/render-functions';
 
 const searchButton = document.querySelector('.searchButton');
+const loadMoreButton = document.querySelector('.load-more');
+
 const clearInput = () => {
   const input = document.querySelector('.input');
   input.value = '';
@@ -15,89 +24,81 @@ function hideLoader() {
   loader.style.display = 'none';
 }
 
-searchButton.addEventListener('click', event => {
+searchButton.addEventListener('click', async event => {
   event.preventDefault();
 
   const input = document.querySelector('.input');
 
-  if (input.value.trim() == '') {
+  if (input.value.trim() === '') {
     iziToast.error({
       title: 'Error',
-      position: 'topRight',
       message:
         'The search field cannot be empty! Please enter the search query!',
     });
     return;
-  } else {
-    searchPhotos(input)
-      .then(response => {
-        if (!response.ok) {
-          throw new Error(response.status);
-        }
-        return response.json();
-      })
-      .then(data => {
-        hideLoader();
-        markupInterface(data);
-        if (!listImg.childElementCount) {
-          iziToast.error({
-            title: 'Error',
-            message:
-              'Sorry, there are no images matching your search query. Please try again!',
-          });
-        }
-      })
-      .catch(error => {
-        hideLoader();
-        console.error('Error:', error);
-      });
   }
+
+  resetPage();
+  setCurrentQuery(input.value);
+  listImg.innerHTML = '';
+  loadMoreButton.style.display = 'none';
+
+  try {
+    const data = await searchPhotos(getCurrentQuery(), getCurrentPage());
+    markupInterface(data);
+
+    if (data.hits.length) {
+      loadMoreButton.style.display = 'block';
+    }
+
+    if (data.totalHits === 0) {
+      iziToast.error({
+        title: 'Error',
+        message:
+          'Sorry, there was an error when receiving data. Please try again!',
+      });
+    }
+  } catch (error) {
+    iziToast.error({
+      title: 'Error',
+      message:
+        'Sorry, there was an error when receiving data. Please try again!',
+    });
+  }
+
   clearInput();
 });
 
-document.querySelector('.btn');
-let page = 1;
-// Controls the number of items in the group
-let perPage = 10;
+loadMoreButton.addEventListener('click', async () => {
+  incrementPage();
 
-fetchPostsBtn.addEventListener('click', async () => {
   try {
-    const posts = await fetchPosts();
-    renderPosts(posts);
-    // Increase the group number
-    page += 1;
+    const data = await searchPhotos(getCurrentQuery(), getCurrentPage());
+    markupInterface(data);
 
-    // Replace button text after first request
-    if (page > 1) {
-      fetchPostsBtn.textContent = 'Load more';
+    const totalLoadedImages = document.querySelectorAll('.item-list').length;
+
+    if (totalLoadedImages >= getTotalHits()) {
+      loadMoreButton.style.display = 'none';
+      iziToast.error({
+        title: 'Error',
+        message: "We're sorry, but you've reached the end of search results.",
+      });
     }
+
+    const { height: cardHeight } = document
+      .querySelector('.item-list')
+      .getBoundingClientRect();
+
+    window.scrollBy({
+      top: cardHeight * 2,
+      behavior: 'smooth',
+    });
   } catch (error) {
-    console.log(error);
+    iziToast.error({
+      title: 'Error',
+      message:
+        'Sorry, there was an error when receiving data. Please try again!',
+    });
   }
 });
-
-async function fetchPosts() {
-  const params = new URLSearchParams({
-    _limit: perPage,
-    _page: page,
-  });
-
-  const response = await axios.get(
-    `https://jsonplaceholder.typicode.com/posts?${params}`
-  );
-  return response.data;
-}
-
-function renderPosts(posts) {
-  const markup = posts
-    .map(({ id, title, body, userId }) => {
-      return `<li>
-          <h2 class="post-title">${title.slice(0, 30)}</h2>
-          <p><b>Post id</b>: ${id}</p>
-          <p><b>Author id</b>: ${userId}</p>
-          <p class="post-body">${body}</p>
-        </li>`;
-    })
-    .join('');
-  postList.insertAdjacentHTML('beforeend', markup);
-}

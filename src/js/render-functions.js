@@ -1,4 +1,5 @@
 import simpleLightbox from 'simplelightbox';
+import 'simplelightbox/dist/simple-lightbox.min.css';
 
 export const listImg = document.querySelector('.list');
 let lightbox;
