@@ -3,6 +3,10 @@ function showLoader() {
   loader.style.display = 'block';
 }
 
+// import axios from 'axios';
+
+// axios.defaults.baseURL = BASEURL;
+
 export function searchPhotos(input) {
   showLoader();
 
