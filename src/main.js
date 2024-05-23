@@ -12,7 +12,7 @@ import iziToast from 'izitoast';
 import 'izitoast/dist/css/iziToast.min.css';
 
 const searchButton = document.querySelector('.searchButton');
-const loadMoreButton = document.querySelector('.btn');
+const loadMoreButton = document.querySelector('.load-more');
 
 const clearInput = () => {
   const input = document.querySelector('.input');
@@ -40,15 +40,15 @@ searchButton.addEventListener('click', async event => {
 
   resetPage();
   setCurrentQuery(input.value);
-  listImg.innerHTML = '';
-  loadMoreButton.style.display = 'none';
+  listImg.innerHTML = ''; // Очищуємо попередні результати
+  loadMoreButton.style.display = 'none'; // Приховуємо кнопку "Load more" спочатку
 
   try {
     const data = await searchPhotos(getCurrentQuery(), getCurrentPage());
     markupInterface(data);
 
     if (data.hits.length) {
-      loadMoreButton.style.display = 'block';
+      loadMoreButton.style.display = 'block'; // Показуємо кнопку "Load more", якщо є результати
     }
 
     if (data.totalHits === 0) {
