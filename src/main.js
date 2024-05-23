@@ -40,15 +40,15 @@ searchButton.addEventListener('click', async event => {
 
   resetPage();
   setCurrentQuery(input.value);
-  listImg.innerHTML = ''; // Очищуємо попередні результати
-  loadMoreButton.style.display = 'none'; // Приховуємо кнопку "Load more" спочатку
+  listImg.innerHTML = '';
+  loadMoreButton.style.display = 'none';
 
   try {
     const data = await searchPhotos(getCurrentQuery(), getCurrentPage());
     markupInterface(data);
 
     if (data.hits.length) {
-      loadMoreButton.style.display = 'block'; // Показуємо кнопку "Load more", якщо є результати
+      loadMoreButton.style.display = 'block';
     }
 
     if (data.totalHits === 0) {
@@ -83,6 +83,7 @@ loadMoreButton.addEventListener('click', async () => {
       iziToast.error({
         title: 'Error',
         message: "We're sorry, but you've reached the end of search results.",
+        position: 'topRight',
       });
     }
 
