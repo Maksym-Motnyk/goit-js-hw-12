@@ -12,7 +12,7 @@ import iziToast from 'izitoast';
 import 'izitoast/dist/css/iziToast.min.css';
 
 const searchButton = document.querySelector('.searchButton');
-const loadMoreButton = document.querySelector('.load-more');
+const loadMoreButton = document.querySelector('.btn');
 
 const clearInput = () => {
   const input = document.querySelector('.input');
